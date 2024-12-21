@@ -1,56 +1,75 @@
 import { useState } from "react";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { GameChoice } from "@/components/GameChoice";
-import { ScoreBoard } from "@/components/ScoreBoard";
-import { useToast } from "@/components/ui/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 
-const CHOICES = ["Rock", "Paper", "Scissors"];
+// Define what beats what
+const objectBeaters: { [key: string]: string[] } = {
+  "rock": ["paper", "dynamite", "hammer", "drill", "pickaxe"],
+  "paper": ["scissors", "fire", "water", "shredder"],
+  "scissors": ["rock", "hammer", "metal"],
+  "fire": ["water", "extinguisher", "sand"],
+  "water": ["rock", "earth", "sand"],
+};
 
 const Index = () => {
-  const [playerChoice, setPlayerChoice] = useState<string | null>(null);
-  const [computerChoice, setComputerChoice] = useState<string | null>(null);
-  const [playerScore, setPlayerScore] = useState(0);
-  const [computerScore, setComputerScore] = useState(0);
+  const [currentObject, setCurrentObject] = useState("rock");
+  const [userInput, setUserInput] = useState("");
+  const [score, setScore] = useState(0);
+  const [gameOver, setGameOver] = useState(false);
   const { toast } = useToast();
 
-  const determineWinner = (player: string, computer: string) => {
-    if (player === computer) return "tie";
-    if (
-      (player === "Rock" && computer === "Scissors") ||
-      (player === "Paper" && computer === "Rock") ||
-      (player === "Scissors" && computer === "Paper")
-    ) {
-      return "player";
+  console.log("Current object:", currentObject);
+  console.log("Valid beaters:", objectBeaters[currentObject]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const answer = userInput.toLowerCase().trim();
+    console.log("User submitted answer:", answer);
+
+    if (objectBeaters[currentObject].includes(answer)) {
+      // Correct answer
+      toast({
+        title: "Correct! 🎉",
+        description: `${answer} beats ${currentObject}!`,
+      });
+      setScore(score + 1);
+      
+      // If the answer exists as a key in objectBeaters, use it as next object
+      if (objectBeaters[answer]) {
+        setCurrentObject(answer);
+      } else {
+        // If we don't have more objects, player wins
+        toast({
+          title: "Congratulations! 🏆",
+          description: `You've won with a score of ${score + 1}!`,
+        });
+        setGameOver(true);
+      }
+    } else {
+      // Wrong answer
+      toast({
+        title: "Game Over! ❌",
+        description: `${answer} doesn't beat ${currentObject}. Your final score: ${score}`,
+        variant: "destructive",
+      });
+      setGameOver(true);
     }
-    return "computer";
+    setUserInput("");
   };
 
-  const handleChoice = (choice: string) => {
-    const computerSelection = CHOICES[Math.floor(Math.random() * CHOICES.length)];
-    setPlayerChoice(choice);
-    setComputerChoice(computerSelection);
-
-    const winner = determineWinner(choice, computerSelection);
-    
-    if (winner === "player") {
-      setPlayerScore(prev => prev + 1);
-      toast({
-        title: "You won! 🎉",
-        description: `${choice} beats ${computerSelection}`,
-      });
-    } else if (winner === "computer") {
-      setComputerScore(prev => prev + 1);
-      toast({
-        title: "Computer won! 🤖",
-        description: `${computerSelection} beats ${choice}`,
-      });
-    } else {
-      toast({
-        title: "It's a tie! 🤝",
-        description: `Both chose ${choice}`,
-      });
-    }
+  const handleRetry = () => {
+    setCurrentObject("rock");
+    setScore(0);
+    setGameOver(false);
+    setUserInput("");
+    toast({
+      title: "New Game Started! 🎮",
+      description: "What beats a rock?",
+    });
   };
 
   return (
@@ -58,27 +77,47 @@ const Index = () => {
       <div className="min-h-screen p-4 md:p-8">
         <ThemeToggle />
         
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-md mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold text-center mb-8">
-            Rock Paper Scissors
+            What Beats {currentObject.charAt(0).toUpperCase() + currentObject.slice(1)}?
           </h1>
           
-          <ScoreBoard playerScore={playerScore} computerScore={computerScore} />
-          
-          <div className="mb-8">
-            <h2 className="text-xl text-center mb-4">Computer chose: {computerChoice || "?"}</h2>
-          </div>
-
-          <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-            {CHOICES.map((choice) => (
-              <GameChoice
-                key={choice}
-                choice={choice}
-                selected={playerChoice === choice}
-                onClick={() => handleChoice(choice)}
+          <Card className="p-6 mb-8">
+            <div className="text-center mb-4">
+              <p className="text-2xl font-bold">Score: {score}</p>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Input
+                type="text"
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value)}
+                placeholder={`What beats ${currentObject}?`}
+                disabled={gameOver}
+                className="w-full"
               />
-            ))}
-          </div>
+              
+              <div className="flex gap-4">
+                <Button 
+                  type="submit" 
+                  className="w-full"
+                  disabled={gameOver || !userInput.trim()}
+                >
+                  Submit
+                </Button>
+                
+                {gameOver && (
+                  <Button 
+                    onClick={handleRetry}
+                    variant="secondary"
+                    className="w-full"
+                  >
+                    Retry
+                  </Button>
+                )}
+              </div>
+            </form>
+          </Card>
         </div>
       </div>
     </ThemeProvider>
