@@ -6,27 +6,27 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 
-// Define what beats what and their corresponding images
-const objectBeaters: { [key: string]: { beaters: string[], image: string } } = {
+// Define what beats what and their corresponding emojis
+const objectBeaters: { [key: string]: { beaters: string[], emoji: string } } = {
   "rock": {
     beaters: ["paper", "dynamite", "hammer", "drill", "pickaxe"],
-    image: "https://images.unsplash.com/photo-1504893524553-b855bce32c67"
+    emoji: "🪨"
   },
   "paper": {
     beaters: ["scissors", "fire", "water", "shredder"],
-    image: "https://images.unsplash.com/photo-1517166357932-d20495eeffd1"
+    emoji: "📄"
   },
   "scissors": {
     beaters: ["rock", "hammer", "metal"],
-    image: "https://images.unsplash.com/photo-1503792501406-2c40da09e1e2"
+    emoji: "✂️"
   },
   "fire": {
     beaters: ["water", "extinguisher", "sand"],
-    image: "https://images.unsplash.com/photo-1517998363-5496666c3d36"
+    emoji: "🔥"
   },
   "water": {
     beaters: ["rock", "earth", "sand"],
-    image: "https://images.unsplash.com/photo-1501630834273-4b5604d2ee31"
+    emoji: "💧"
   },
 };
 
@@ -98,11 +98,9 @@ const Index = () => {
           </h1>
           
           <Card className="p-6 mb-8">
-            <img 
-              src={objectBeaters[currentObject].image} 
-              alt={currentObject}
-              className="object-image"
-            />
+            <div className="text-9xl text-center mb-6">
+              {objectBeaters[currentObject].emoji}
+            </div>
             
             <div className="text-center mb-4">
               <p className="text-2xl font-bold">Score: {score}</p>

@@ -73,7 +73,3 @@
   bottom: 1.5rem !important;
   top: auto !important;
 }
-
-.object-image {
-  @apply w-32 h-32 md:w-48 md:h-48 mx-auto mb-6 rounded-lg object-cover shadow-lg;
-}
