@@ -35,18 +35,31 @@ const Index = () => {
   const [userInput, setUserInput] = useState("");
   const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [usedAnswers, setUsedAnswers] = useState<string[]>([]);
   const { toast } = useToast();
 
   console.log("Current object:", currentObject);
   console.log("Valid beaters:", objectBeaters[currentObject].beaters);
+  console.log("Used answers:", usedAnswers);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const answer = userInput.toLowerCase().trim();
     console.log("User submitted answer:", answer);
 
+    if (usedAnswers.includes(answer)) {
+      toast({
+        title: "Already Used! 🔄",
+        description: `You've already used "${answer}" before. Try something else!`,
+        variant: "destructive",
+      });
+      setUserInput("");
+      return;
+    }
+
     if (objectBeaters[currentObject].beaters.includes(answer)) {
       // Correct answer
+      setUsedAnswers([...usedAnswers, answer]);
       toast({
         title: "Correct! 🎉",
         description: `${answer} beats ${currentObject}!`,
@@ -81,6 +94,7 @@ const Index = () => {
     setScore(0);
     setGameOver(false);
     setUserInput("");
+    setUsedAnswers([]);
     toast({
       title: "New Game Started! 🎮",
       description: "What beats a rock?",
